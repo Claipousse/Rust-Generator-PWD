@@ -1,1 +1,14 @@
-/target
+# Ignore directory .idea (JetBrains IDEs)
+.idea/
+
+# Ignore Rust build files
+/target/
+/Cargo.lock
+
+# Ignorer les fichiers de logs et temporaires
+**/*.log
+**/*.tmp
+
+# Ignore macOs & Linux specific files
+.DS_Store
+*.swp

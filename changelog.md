@@ -1,0 +1,4 @@
+- Modification of the Error messages
+- Added success message when modifying the length and the number of password generated
+- Simplification of the code to generate passwords
+- Added a limit of 80 characters to the passwords length

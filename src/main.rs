@@ -1,14 +1,33 @@
 use std::io;
 use rand::Rng;
 
-fn input_size(message:&str) -> usize {
+fn input_size() -> usize {
     loop {
         let mut size = String::new();
-        println!("{message}");
-        io::stdin().read_line(&mut size).expect("Error of reading...");
+        println!("Enter new password length (Max:80) :");
+        io::stdin().read_line(&mut size).expect("❌ Error of reading...");
         match size.trim().parse::<usize>() {
-            Ok(n) => return n,
-            Err(_) => println!("Error : Invalid size, please try again.")
+            Ok(n) if n <=80 => {
+                println!("✅ The new length of the passwords is now {n}.\n");
+                return n
+            },
+            Ok(n) if n > 80 => println!("❌ Error : The maximum size is 80, please try again."),
+            _ => println!("❌ Error : Invalid size, please try again.")
+        }
+    }
+}
+
+fn input_number_of_pwd() -> usize {
+    loop {
+        let mut size = String::new();
+        println!("Enter number of passwords to generate :");
+        io::stdin().read_line(&mut size).expect("❌ Error of reading...");
+        match size.trim().parse::<usize>() {
+            Ok(n) => {
+                println!("✅ {n} passwords will be generated in the next request.\n");
+                return n
+            },
+            _ => println!("❌ Error : Invalid input, please try again.")
         }
     }
 }
@@ -22,12 +41,12 @@ fn ask_yes_or_no(message:&str) -> bool {
         match choice.as_str() {
             "y" => return true,
             "n" => return false,
-            _ => println!("Error : Invalid")
+            _ => println!("❌ Error : Invalid")
         }
     }
 }
 
-fn generate_password(length:usize, use_capital:bool, use_digits:bool, use_symbols:bool) -> String {
+fn generate_passwords(length:usize, number_of_passwords:usize, use_capital:bool, use_digits:bool, use_symbols:bool){
     let mut rng = rand::rng();
 
     let lowercase = "abcdefghijklmnopqrstuvwxyz";
@@ -47,21 +66,17 @@ fn generate_password(length:usize, use_capital:bool, use_digits:bool, use_symbol
         charset.push_str(symbols)
     }
     if charset.is_empty() {
-        panic!("Error: No character set selected for password generation.");
+        panic!("❌ Error: No character set selected for password generation.");
     }
-    (0..length)
-        .map(|_| {
-            let idx = rng.random_range(0..charset.len());
-            charset.chars().nth(idx).unwrap()
-        })
-        .collect()
-}
 
-fn generate_and_display_passwords(length: usize, number_of_passwords: usize, use_capital: bool, use_digits: bool, use_symbols: bool) {
     println!("\n🔑 Generated Passwords:");
     for _ in 0..number_of_passwords {
-        let password = generate_password(length, use_capital, use_digits, use_symbols);
-        println!("{}", password);
+        let password:String = (0..length)
+            .map(|_| {
+                let index = rng.random_range(0..charset.len());
+                charset.chars().nth(index).unwrap()
+            }).collect();
+        println!("{}", password)
     }
     println!()
 }
@@ -112,15 +127,15 @@ fn menu() {
         let choice = choice.trim();
         println!();
         match choice {
-            "1" => generate_and_display_passwords(length, number_of_passwords, use_capital, use_digits, use_symbols),
+            "1" => generate_passwords(length, number_of_passwords, use_capital, use_digits, use_symbols),
             "2" => display_status(use_capital, use_digits, use_symbols, length, number_of_passwords),
             "3" => {
                 use_capital = ask_yes_or_no("Do you want capital letters (A-Z) in your password? (y/n)");
                 use_digits = ask_yes_or_no("Do you want digits (0-9) in your password? (y/n)");
                 use_symbols = ask_yes_or_no("Do you want symbols (@!&$?*) in your password? (y/n)");
             }
-            "4" => length = input_size("Enter new password length:"),
-            "5" => number_of_passwords = input_size("Enter number of passwords to generate:"),
+            "4" => length = input_size(),
+            "5" => number_of_passwords = input_number_of_pwd(),
             "6" => {
                 println!("Goodbye! 👋");
                 break;
