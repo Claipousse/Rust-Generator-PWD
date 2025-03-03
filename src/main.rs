@@ -1,5 +1,17 @@
+use std::fs::OpenOptions;
 use std::io;
+use std::io::{Write, Error};
 use rand::Rng;
+
+fn save_passwords_to_file(passwords: &[String]) -> Result<(), Error> {
+    let mut file = OpenOptions::new().create(true).append(true).open("passwords.txt")?;
+    writeln!(file, "\n🔑 Generated Passwords:").expect("❌ Error writing header to file");
+    for password in passwords {
+        writeln!(file, "{}", password).expect("❌ Error writing password to file");
+    }
+    println!("✅ Passwords saved successfully in 'passwords.txt'\n");
+    Ok(())
+}
 
 fn input_size() -> usize {
     loop {
@@ -46,7 +58,7 @@ fn ask_yes_or_no(message:&str) -> bool {
     }
 }
 
-fn generate_passwords(length:usize, number_of_passwords:usize, use_capital:bool, use_digits:bool, use_symbols:bool){
+fn generate_passwords(length:usize, number_of_passwords:usize, use_capital:bool, use_digits:bool, use_symbols:bool) {
     let mut rng = rand::rng();
 
     let lowercase = "abcdefghijklmnopqrstuvwxyz";
@@ -69,6 +81,8 @@ fn generate_passwords(length:usize, number_of_passwords:usize, use_capital:bool,
         panic!("❌ Error: No character set selected for password generation.");
     }
 
+    let mut list_of_passwords:Vec<String> = Vec::new();
+
     println!("\n🔑 Generated Passwords:");
     for _ in 0..number_of_passwords {
         let password:String = (0..length)
@@ -76,9 +90,15 @@ fn generate_passwords(length:usize, number_of_passwords:usize, use_capital:bool,
                 let index = rng.random_range(0..charset.len());
                 charset.chars().nth(index).unwrap()
             }).collect();
-        println!("{}", password)
+        println!("{}", password);
+        list_of_passwords.push(password)
     }
-    println!()
+    println!();
+    if ask_yes_or_no("💾 Do you want to save these passwords to 'passwords.txt'? (y/n)") {
+        if let Err(e) = save_passwords_to_file(&list_of_passwords) {
+            println!("❌ Error saving passwords: {}", e);
+        }
+    }
 }
 
 fn display_status(capital:bool, digits:bool, symbols:bool, length:usize, number_passwords:usize) {
