@@ -58,7 +58,7 @@ fn ask_yes_or_no(message:&str) -> bool {
     }
 }
 
-fn generate_passwords(length:usize, number_of_passwords:usize, use_capital:bool, use_digits:bool, use_symbols:bool) {
+fn generate_passwords(in_console:bool, length:usize, number_of_passwords:usize, use_capital:bool, use_digits:bool, use_symbols:bool) {
     let mut rng = rand::rng();
 
     let lowercase = "abcdefghijklmnopqrstuvwxyz";
@@ -83,18 +83,22 @@ fn generate_passwords(length:usize, number_of_passwords:usize, use_capital:bool,
 
     let mut list_of_passwords:Vec<String> = Vec::new();
 
-    println!("\n🔑 Generated Passwords:");
+    if in_console {
+        println!("\n🔑 Generated Passwords:");
+    }
     for _ in 0..number_of_passwords {
         let password:String = (0..length)
             .map(|_| {
                 let index = rng.random_range(0..charset.len());
                 charset.chars().nth(index).unwrap()
             }).collect();
-        println!("{}", password);
+        if in_console {
+            println!("{}", password);
+        }
         list_of_passwords.push(password)
     }
     println!();
-    if ask_yes_or_no("💾 Do you want to save these passwords to 'passwords.txt'? (y/n)") {
+    if in_console == false {
         if let Err(e) = save_passwords_to_file(&list_of_passwords) {
             println!("❌ Error saving passwords: {}", e);
         }
@@ -132,31 +136,37 @@ fn menu() {
     let mut use_capital: bool = true;
     let mut use_digits: bool = true;
     let mut use_symbols: bool = true;
+    let mut in_console: bool = true;
 
     println!("Welcome to my generator of password! - Made by Claipousse\n");
     display_status(use_capital, use_digits, use_symbols, length, number_of_passwords);
     loop {
         let mut choice = String::new();
-        println!("1 - Generate password(s)");
-        println!("2 - Generator Status");
-        println!("3 - Change characters used");
-        println!("4 - Change password(s) length");
-        println!("5 - Change number of passwords generated");
-        println!("6 - Exit");
+        println!("1 - Generate password(s) in console");
+        println!("2 - Generate password(s) in text file");
+        println!("3 - Generator Status");
+        println!("4 - Change characters used");
+        println!("5 - Change password(s) length");
+        println!("6 - Change number of passwords generated");
+        println!("7 - Exit");
         io::stdin().read_line(&mut choice).expect("Error when reading...");
         let choice = choice.trim();
         println!();
         match choice {
-            "1" => generate_passwords(length, number_of_passwords, use_capital, use_digits, use_symbols),
-            "2" => display_status(use_capital, use_digits, use_symbols, length, number_of_passwords),
-            "3" => {
+            "1" => generate_passwords(in_console,length, number_of_passwords, use_capital, use_digits, use_symbols),
+            "2" => {
+                in_console = false;
+                generate_passwords(in_console,length, number_of_passwords, use_capital, use_digits, use_symbols)
+            },
+            "3" => display_status(use_capital, use_digits, use_symbols, length, number_of_passwords),
+            "4" => {
                 use_capital = ask_yes_or_no("Do you want capital letters (A-Z) in your password? (y/n)");
                 use_digits = ask_yes_or_no("Do you want digits (0-9) in your password? (y/n)");
                 use_symbols = ask_yes_or_no("Do you want symbols (@!&$?*) in your password? (y/n)");
             }
-            "4" => length = input_size(),
-            "5" => number_of_passwords = input_number_of_pwd(),
-            "6" => {
+            "5" => length = input_size(),
+            "6" => number_of_passwords = input_number_of_pwd(),
+            "7" => {
                 println!("Goodbye! 👋");
                 break;
             }
